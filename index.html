@@ -249,6 +249,7 @@
             font-weight: 600;
         }
 
+        /* LOADING SPINNER STYLES */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -316,6 +317,7 @@
             animation: spin 0.8s linear infinite;
         }
 
+        /* ESTILOS PARA PRODUCTO AGOTADO */
         .product-card.sold-out {
             opacity: 0.6;
             position: relative;
@@ -344,6 +346,7 @@
             pointer-events: none;
         }
 
+        /* Toggle Switch Styles */
         .toggle-switch {
             position: relative;
             width: 50px;
@@ -396,11 +399,13 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 
+    <!-- LOADING OVERLAY -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="spinner"></div>
         <p class="loading-text" id="loading-text">Cargando...</p>
     </div>
 
+    <!-- LOGO SECTION -->
     <div class="top-logo-section">
         <div class="container mx-auto px-4 text-center">
             <div class="cursor-pointer" onclick="showSection('shop')">
@@ -409,6 +414,7 @@
         </div>
     </div>
 
+    <!-- Navigation -->
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-center items-center">
             <div class="flex items-center space-x-6">
@@ -435,13 +441,17 @@
         </div>
     </nav>
 
+    <!-- Main Content Area -->
     <main class="container mx-auto px-4 py-8 min-h-screen">
         
+        <!-- SHOP SECTION -->
         <div id="shop-section" class="fade-in">
-
+            
+            <!-- HERO CAROUSEL SECTION -->
             <div class="mb-12">
                 <div class="hero-carousel rounded-2xl shadow-2xl overflow-hidden relative" id="heroCarousel">
                     
+                    <!-- Slide 1 -->
                     <div class="hero-slide active bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-600">
                         <div class="grid md:grid-cols-2 gap-0">
                             <div class="p-8 md:p-12 flex flex-col justify-center text-white">
@@ -456,6 +466,7 @@
                         </div>
                     </div>
 
+                    <!-- Slide 2 -->
                     <div class="hero-slide bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600">
                         <div class="grid md:grid-cols-2 gap-0">
                             <div class="p-8 md:p-12 flex flex-col justify-center text-white">
@@ -470,6 +481,7 @@
                         </div>
                     </div>
 
+                    <!-- Slide 3 -->
                     <div class="hero-slide bg-gradient-to-r from-fuchsia-600 via-pink-600 to-rose-600">
                         <div class="grid md:grid-cols-2 gap-0">
                             <div class="p-8 md:p-12 flex flex-col justify-center text-white">
@@ -484,6 +496,7 @@
                         </div>
                     </div>
 
+                    <!-- Slide 4 -->
                     <div class="hero-slide bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500">
                         <div class="grid md:grid-cols-2 gap-0">
                             <div class="p-8 md:p-12 flex flex-col justify-center text-white">
@@ -498,6 +511,7 @@
                         </div>
                     </div>
 
+                    <!-- Carousel Controls -->
                     <button class="carousel-btn prev" onclick="changeSlide(-1)">
                         <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -509,6 +523,7 @@
                         </svg>
                     </button>
 
+                    <!-- Indicators -->
                     <div class="carousel-indicators">
                         <div class="indicator active" onclick="goToSlide(0)"></div>
                         <div class="indicator" onclick="goToSlide(1)"></div>
@@ -517,6 +532,7 @@
                     </div>
                 </div>
 
+                <!-- Tips Section -->
                 <div class="mb-8 mt-8">
                     <h2 class="text-3xl font-bold text-center mb-2"><span class="gradient-text">Tips de Cuidado Capilar</span></h2>
                     <p class="text-gray-500 text-center mb-8">Consejos profesionales para mantener tu cabello hermoso</p>
@@ -564,6 +580,7 @@
                     </div>
                 </div>
 
+                <!-- Info Banner -->
                 <div class="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl shadow-xl p-8 text-white">
                     <div class="grid md:grid-cols-2 gap-6 text-center">
                         <div>
@@ -578,6 +595,7 @@
                 </div>
             </div>
 
+            <!-- Products Section -->
             <div class="mb-10">
                 <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Nuestros <span class="gradient-text">Productos</span></h2>
                 <p class="text-gray-500 text-center mb-8">Eleva tu estilo al siguiente nivel con nuestros productos de calidad</p>
@@ -585,6 +603,7 @@
             <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
         </div>
 
+        <!-- ADMIN LOGIN SECTION -->
         <div id="admin-login-section" class="hidden fade-in max-w-md mx-auto mt-10 bg-white p-8 rounded-xl shadow-lg">
             <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Acceso Administrativo</h2>
             <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
@@ -601,6 +620,7 @@
             <p id="login-error" class="text-red-500 text-sm mt-4 text-center hidden">Credenciales incorrectas</p>
         </div>
 
+        <!-- ADMIN DASHBOARD SECTION -->
         <div id="admin-dashboard-section" class="hidden fade-in">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-2xl font-bold text-gray-800">Gestión de Productos</h2>
@@ -608,6 +628,7 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Add Product Form -->
                 <div class="bg-white p-6 rounded-xl shadow-lg h-fit">
                     <h3 class="text-lg font-bold mb-4 border-b pb-2 text-pink-600">Agregar Nuevo Producto</h3>
                     <form id="add-product-form" onsubmit="addProduct(event)" class="space-y-4">
@@ -645,6 +666,7 @@
                     </form>
                 </div>
 
+                <!-- Product List -->
                 <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
                     <h3 class="text-lg font-bold mb-4 border-b pb-2 text-pink-600">Productos Existentes</h3>
                     <div class="overflow-x-auto">
@@ -668,6 +690,7 @@
 
     </main>
 
+    <!-- FLOATING CHECKOUT BUTTON -->
     <button id="floating-checkout-btn" onclick="openCheckoutModal()" class="floating-checkout hidden bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white font-bold py-4 px-8 rounded-full flex items-center gap-3 hover:from-pink-600 hover:to-fuchsia-700 transition-all">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -676,6 +699,7 @@
         <span id="floating-total" class="bg-white text-pink-600 px-3 py-1 rounded-full text-sm font-bold">$0.00</span>
     </button>
 
+    <!-- CART SIDEBAR -->
     <div id="cart-sidebar" class="fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col">
         <div class="p-4 bg-gradient-to-r from-pink-500 to-fuchsia-600 border-b flex justify-between items-center">
             <h2 class="text-xl font-bold text-white">Tu Carrito</h2>
@@ -697,6 +721,7 @@
         </div>
     </div>
 
+    <!-- CHECKOUT MODAL -->
     <div id="checkout-modal" class="fixed inset-0 modal z-50 hidden flex items-center justify-center p-4" onclick="if(event.target === this) closeCheckoutModal()">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
@@ -775,6 +800,7 @@
         </div>
     </div>
 
+    <!-- FULL IMAGE MODAL -->
     <div id="full-image-modal" class="fixed inset-0 full-image-modal z-[60] hidden flex items-center justify-center p-4" onclick="closeFullImageModal()">
         <div class="relative">
             <img id="full-image-src" src="" alt="Producto completo" class="animate-fade-in">
@@ -787,15 +813,18 @@
     </div>
 
     <script>
+    // --- 1. CONFIGURACIÓN DE SUPABASE ---
     const SUPABASE_URL = 'https://qtcyuvbhidttoxxctrlo.supabase.co'; 
     const SUPABASE_ANON_KEY = 'sb_publishable_DNd3MsCMPCBRUdHdXJNeAg_c0a1htqC';
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const auth = db.auth;
 
+    // --- 2. VARIABLES DE ESTADO ---
     let products = []; 
     let cart = []; 
     let isAdmin = false;
 
+    // --- FUNCIONES DE LOADING ---
     function showLoading(message = 'Cargando...') {
         const overlay = document.getElementById('loading-overlay');
         const text = document.getElementById('loading-text');
@@ -821,6 +850,7 @@
         }
     }
 
+    // --- VERIFICAR SESIÓN AL CARGAR ---
     async function checkAdminSession() {
         const { data: { session } } = await auth.getSession();
         if (session) {
@@ -829,6 +859,7 @@
         }
     }
 
+    // --- ACTUALIZAR TEXTO DEL BOTÓN ADMIN ---
     function updateAdminButtonText() {
         const btnText = document.getElementById('admin-btn-text');
         if (isAdmin) {
@@ -842,6 +873,7 @@
         }
     }
 
+    // --- VERIFICAR ACCESO ADMIN ---
     async function checkAdminAccess() {
         if (isAdmin) {
             showSection('admin-dashboard');
@@ -851,6 +883,7 @@
         }
     }
 
+    // --- LOGIN CON SUPABASE AUTH ---
     async function handleAdminLogin(e) {
         e.preventDefault();
         setButtonLoading('login-btn', true);
@@ -887,6 +920,7 @@
         }
     }
 
+    // --- LOGOUT CON SUPABASE AUTH ---
     async function logoutAdmin() {
         showLoading('Cerrando sesión...');
         await auth.signOut();
@@ -897,6 +931,7 @@
         hideLoading();
     }
 
+    // --- ESCUCHAR CAMBIOS DE AUTENTICACIÓN ---
     auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN') {
             isAdmin = true;
@@ -907,12 +942,14 @@
         }
     });
 
+    // --- CAROUSEL VARIABLES ---
     let currentSlide = 0;
     let slideInterval;
     const slides = document.querySelectorAll('.hero-slide');
     const indicators = document.querySelectorAll('.indicator');
     const totalSlides = slides.length;
 
+    // --- CAROUSEL FUNCTIONS ---
     function showSlide(index) {
         slides.forEach((slide, i) => {
             slide.classList.remove('active');
@@ -947,6 +984,7 @@
 
     document.addEventListener('DOMContentLoaded', function() { resetInterval(); });
 
+    // --- CARGA DE DATOS ---
     async function fetchProducts() {
         showLoading('Cargando productos...');
         try {
@@ -965,6 +1003,7 @@
         }
     }
 
+    // --- FUNCIONES DE NAVEGACIÓN ---
     function showSection(sectionId) {
         document.getElementById('shop-section').classList.add('hidden');
         document.getElementById('admin-login-section').classList.add('hidden');
@@ -973,6 +1012,7 @@
         if (section) section.classList.remove('hidden');
     }
 
+    // --- GESTIÓN DE PRODUCTOS ---
     function toggleVariantsField() {
         const hasVariants = document.getElementById('new-prod-has-variants').value;
         const variantsField = document.getElementById('variants-field');
@@ -1092,6 +1132,7 @@
         }).join('');
     }
 
+    // --- CARRITO Y TIENDA ---
     function toggleCart() {
         const sidebar = document.getElementById('cart-sidebar');
         sidebar.classList.toggle('translate-x-full');
@@ -1312,6 +1353,7 @@
         }).join('');
     }
 
+    // --- MODAL DE CHECKOUT ---
     function closeCheckoutModal() {
         document.getElementById('checkout-modal').classList.add('hidden');
     }
@@ -1340,7 +1382,6 @@
 
     function calculateTotal() {
         const subtotal = cart.reduce((sum, item) => sum + (item.precio * item.quantity), 0);
-        
         const zone = document.getElementById('checkout-zone').value;
         const zoneSection = document.getElementById('zone-section');
         
@@ -1355,6 +1396,7 @@
         document.getElementById('summary-total').innerText = `$${total.toFixed(2)}`;
     }
 
+    // ✅ FUNCIÓN ACTUALIZADA: Emojis y número nuevo
     async function sendToWhatsapp() {
         const name = document.getElementById('checkout-name').value;
         const phone = document.getElementById('checkout-phone').value;
@@ -1362,6 +1404,7 @@
         const zone = document.getElementById('checkout-zone').value;
         const zoneText = zone === 'center' ? 'Centro' : 'Otra Zona';
         const total = document.getElementById('summary-total').innerText;
+        const payment = document.getElementById('checkout-payment').value;
         
         if (!name || !phone || !address) {
             alert('Por favor completa tus datos y la dirección de entrega');
@@ -1373,33 +1416,36 @@
         
         await new Promise(resolve => setTimeout(resolve, 800));
 
-        let message = `*Nuevo Pedido - 100 Pre Wuapa Peluquería & Estilo*\n\n`;
-        message += `*Cliente:* ${name}\n`;
-        message += `*Teléfono:* ${phone}\n`;
-        message += `*Dirección:* ${address} (${zoneText})\n\n`;
-        message += `*Productos:*\n`;
+        // ✅ Emojis explícitos en el mensaje
+        let message = '\ud83d\udecd\ufe0f *NUEVO PEDIDO - 100 PRE WUAPA* \ud83d\udecd\ufe0f\n\n';
+        message += '\ud83d\udc64 *Cliente:* ' + name + '\n';
+        message += '\ud83d\udcf1 *Teléfono:* ' + phone + '\n';
+        message += '\ud83d\udccd *Dirección:* ' + address + ' (' + zoneText + ')\n\n';
+        message += '\ud83d\udce6 *PRODUCTOS:*\n';
         
         cart.forEach(item => {
             const itemTotal = (item.precio * item.quantity).toFixed(2);
-            const variantInfo = item.variant ? ` (${item.variant})` : '';
+            const variantInfo = item.variant ? ' (' + item.variant + ')' : '';
             if (item.quantity > 1) {
-                message += `- ${item.quantity} x ${item.nombre}${variantInfo} ($${itemTotal})\n`;
+                message += '\u25ab\ufe0f ' + item.quantity + ' x ' + item.nombre + variantInfo + ' - $' + itemTotal + '\n';
             } else {
-                message += `- ${item.nombre}${variantInfo} ($${item.precio})\n`;
+                message += '\u25ab\ufe0f ' + item.nombre + variantInfo + ' - $' + item.precio + '\n';
             }
         });
         
-        message += `\n*TOTAL A PAGAR:* ${total}`;
-        message += `\n_Método de pago: ${document.getElementById('checkout-payment').value}_`;
+        message += '\n\ud83d\udcb0 *TOTAL A PAGAR:* ' + total + '\n';
+        message += '\ud83d\udcb3 *Método de pago:* ' + payment;
 
         const encodedMessage = encodeURIComponent(message);
-        window.open(`https://wa.me/5358473210?text=${encodedMessage}`, '_blank');
+        // ✅ NÚMERO ACTUALIZADO
+        window.open('https://wa.me/5351164979?text=' + encodedMessage, '_blank');
         
         hideLoading();
         setButtonLoading('whatsapp-btn', false);
         closeCheckoutModal();
     }
 
+    // --- FUNCIONES PARA IMAGEN COMPLETA ---
     function openFullImage(imageSrc) {
         const modal = document.getElementById('full-image-modal');
         const img = document.getElementById('full-image-src');
@@ -1414,6 +1460,7 @@
         document.body.style.overflow = '';
     }
 
+    // Inicialización
     checkAdminSession();
     fetchProducts();
     </script>
