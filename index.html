@@ -1,1468 +1,1252 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>100 Pre Wuapa - Peluquería & Estilo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Poppins', sans-serif; }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #d4a373; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #b08968; }
-
-        .modal {
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-        }
-
-        .floating-checkout {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 40;
-            animation: slideUp 0.5s ease-out;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .floating-checkout:hover {
-            animation: pulse 0.3s ease-in-out;
-        }
-
-        .logo-img {
-            max-height: 150px;
-            width: auto;
-            object-fit: contain;
-            transition: transform 0.3s ease;
-        }
-        
-        .logo-img:hover {
-            transform: scale(1.05);
-        }
-
-        .quantity-btn {
-            @apply bg-gray-200 hover:bg-gray-300 text-gray-700 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold transition;
-        }
-
-        .product-image-container {
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .product-image-container img {
-            transition: transform 0.3s ease;
-        }
-
-        .product-image-container:hover img {
-            transform: scale(1.05);
-        }
-
-        .image-hint {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-
-        .product-image-container:hover .image-hint {
-            opacity: 1;
-        }
-
-        .hint-text {
-            background: rgba(255, 255, 255, 0.95);
-            color: #ec4899;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 14px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-
-        .full-image-modal {
-            background-color: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(8px);
-        }
-
-        .full-image-modal img {
-            max-height: 90vh;
-            max-width: 90vw;
-            object-fit: contain;
-            border-radius: 8px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-        }
-
-        .hero-carousel {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-slide {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.8s ease-in-out;
-        }
-
-        .hero-slide.active {
-            display: block;
-            opacity: 1;
-        }
-
-        .carousel-indicators {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-        }
-
-        .indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .indicator.active {
-            background: white;
-            width: 30px;
-            border-radius: 6px;
-        }
-
-        .carousel-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            z-index: 10;
-        }
-
-        .carousel-btn:hover {
-            background: rgba(255, 255, 255, 0.4);
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .carousel-btn.prev { left: 20px; }
-        .carousel-btn.next { right: 20px; }
-
-        .tip-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .tip-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(236, 72, 153, 0.2);
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .top-logo-section {
-            background: linear-gradient(135deg, #fce7f3 0%, #f3e8ff 100%);
-            padding: 20px 0;
-            border-bottom: 3px solid #ec4899;
-        }
-
-        .variant-selector {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .variant-btn {
-            padding: 6px 14px;
-            border: 2px solid #ec4899;
-            border-radius: 20px;
-            background: white;
-            color: #ec4899;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .variant-btn:hover {
-            background: #fce7f3;
-        }
-
-        .variant-btn.selected {
-            background: #ec4899;
-            color: white;
-        }
-
-        .variant-required {
-            color: #ef4444;
-            font-size: 12px;
-            margin-top: 4px;
-        }
-
-        .variant-badge {
-            background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        /* LOADING SPINNER STYLES */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(5px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            flex-direction: column;
-        }
-
-        .loading-overlay.active {
-            display: flex;
-        }
-
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 5px solid #fce7f3;
-            border-top: 5px solid #ec4899;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            margin-top: 20px;
-            color: #ec4899;
-            font-weight: 600;
-            font-size: 16px;
-            animation: pulse-text 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse-text {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        .btn-loading {
-            position: relative;
-            pointer-events: none;
-            opacity: 0.7;
-        }
-
-        .btn-loading::after {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            top: 50%;
-            left: 50%;
-            margin-left: -8px;
-            margin-top: -8px;
-            border: 2px solid transparent;
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        /* ESTILOS PARA PRODUCTO AGOTADO */
-        .product-card.sold-out {
-            opacity: 0.6;
-            position: relative;
-        }
-
-        .product-card.sold-out::before {
-            content: 'AGOTADO';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-15deg);
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            padding: 10px 30px;
-            font-size: 24px;
-            font-weight: bold;
-            border-radius: 8px;
-            z-index: 10;
-            letter-spacing: 2px;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-        }
-
-        .product-card.sold-out .add-to-cart-btn {
-            background: #9ca3af !important;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        /* Toggle Switch Styles */
-        .toggle-switch {
-            position: relative;
-            width: 50px;
-            height: 26px;
-            appearance: none;
-            background: #d1d5db;
-            border-radius: 9999px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .toggle-switch:checked {
-            background: #10b981;
-        }
-
-        .toggle-switch::before {
-            content: '';
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            transition: transform 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .toggle-switch:checked::before {
-            transform: translateX(24px);
-        }
-
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status-active {
-            background: #d1fae5;
-            color: #059669;
-        }
-
-        .status-sold-out {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>100 Pre Wuapa - Peluquería & Estilo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Poppins', sans-serif; }
+.fade-in { animation: fadeIn 0.3s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #d4a373; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #b08968; }
+.modal {
+background-color: rgba(0,0,0,0.5);
+backdrop-filter: blur(4px);
+}
+.floating-checkout {
+position: fixed;
+bottom: 30px;
+right: 30px;
+z-index: 40;
+animation: slideUp 0.5s ease-out;
+box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+@keyframes slideUp {
+from { transform: translateY(100px); opacity: 0; }
+to { transform: translateY(0); opacity: 1; }
+}
+@keyframes pulse {
+0% { transform: scale(1); }
+50% { transform: scale(1.05); }
+100% { transform: scale(1); }
+}
+.floating-checkout:hover {
+animation: pulse 0.3s ease-in-out;
+}
+.logo-img {
+max-height: 150px;
+width: auto;
+object-fit: contain;
+transition: transform 0.3s ease;
+}
+.logo-img:hover {
+transform: scale(1.05);
+}
+.quantity-btn {
+@apply bg-gray-200 hover:bg-gray-300 text-gray-700 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold transition;
+}
+.product-image-container {
+position: relative;
+overflow: hidden;
+cursor: pointer;
+}
+.product-image-container img {
+transition: transform 0.3s ease;
+}
+.product-image-container:hover img {
+transform: scale(1.05);
+}
+.image-hint {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0, 0, 0, 0.5);
+display: flex;
+align-items: center;
+justify-content: center;
+opacity: 0;
+transition: opacity 0.3s ease;
+pointer-events: none;
+}
+.product-image-container:hover .image-hint {
+opacity: 1;
+}
+.hint-text {
+background: rgba(255, 255, 255, 0.95);
+color: #ec4899;
+padding: 8px 16px;
+border-radius: 20px;
+font-weight: 600;
+font-size: 14px;
+box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.full-image-modal {
+background-color: rgba(0, 0, 0, 0.9);
+backdrop-filter: blur(8px);
+}
+.full-image-modal img {
+max-height: 90vh;
+max-width: 90vw;
+object-fit: contain;
+border-radius: 8px;
+box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.hero-carousel {
+position: relative;
+overflow: hidden;
+}
+.hero-slide {
+display: none;
+opacity: 0;
+transition: opacity 0.8s ease-in-out;
+}
+.hero-slide.active {
+display: block;
+opacity: 1;
+}
+.carousel-indicators {
+position: absolute;
+bottom: 20px;
+left: 50%;
+transform: translateX(-50%);
+display: flex;
+gap: 10px;
+z-index: 10;
+}
+.indicator {
+width: 12px;
+height: 12px;
+border-radius: 50%;
+background: rgba(255, 255, 255, 0.5);
+cursor: pointer;
+transition: all 0.3s ease;
+}
+.indicator.active {
+background: white;
+width: 30px;
+border-radius: 6px;
+}
+.carousel-btn {
+position: absolute;
+top: 50%;
+transform: translateY(-50%);
+background: rgba(255, 255, 255, 0.2);
+backdrop-filter: blur(10px);
+border: none;
+width: 50px;
+height: 50px;
+border-radius: 50%;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.3s ease;
+z-index: 10;
+}
+.carousel-btn:hover {
+background: rgba(255, 255, 255, 0.4);
+transform: translateY(-50%) scale(1.1);
+}
+.carousel-btn.prev { left: 20px; }
+.carousel-btn.next { right: 20px; }
+.tip-card {
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.tip-card:hover {
+transform: translateY(-5px);
+box-shadow: 0 10px 30px rgba(236, 72, 153, 0.2);
+}
+.gradient-text {
+background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+.top-logo-section {
+background: linear-gradient(135deg, #fce7f3 0%, #f3e8ff 100%);
+padding: 20px 0;
+border-bottom: 3px solid #ec4899;
+}
+.variant-selector {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+margin-top: 8px;
+}
+.variant-btn {
+padding: 6px 14px;
+border: 2px solid #ec4899;
+border-radius: 20px;
+background: white;
+color: #ec4899;
+font-size: 13px;
+font-weight: 500;
+cursor: pointer;
+transition: all 0.2s ease;
+}
+.variant-btn:hover {
+background: #fce7f3;
+}
+.variant-btn.selected {
+background: #ec4899;
+color: white;
+}
+.variant-required {
+color: #ef4444;
+font-size: 12px;
+margin-top: 4px;
+}
+.variant-badge {
+background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+color: white;
+padding: 2px 8px;
+border-radius: 10px;
+font-size: 11px;
+font-weight: 600;
+}
+.loading-overlay {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(255, 255, 255, 0.95);
+backdrop-filter: blur(5px);
+display: none;
+align-items: center;
+justify-content: center;
+z-index: 9999;
+flex-direction: column;
+}
+.loading-overlay.active {
+display: flex;
+}
+.spinner {
+width: 60px;
+height: 60px;
+border: 5px solid #fce7f3;
+border-top: 5px solid #ec4899;
+border-radius: 50%;
+animation: spin 1s linear infinite;
+}
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+.loading-text {
+margin-top: 20px;
+color: #ec4899;
+font-weight: 600;
+font-size: 16px;
+animation: pulse-text 1.5s ease-in-out infinite;
+}
+@keyframes pulse-text {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.6; }
+}
+.btn-loading {
+position: relative;
+pointer-events: none;
+opacity: 0.7;
+}
+.btn-loading::after {
+content: '';
+position: absolute;
+width: 16px;
+height: 16px;
+top: 50%;
+left: 50%;
+margin-left: -8px;
+margin-top: -8px;
+border: 2px solid transparent;
+border-top-color: white;
+border-radius: 50%;
+animation: spin 0.8s linear infinite;
+}
+.product-card.sold-out {
+opacity: 0.6;
+position: relative;
+}
+.product-card.sold-out::before {
+content: 'AGOTADO';
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%) rotate(-15deg);
+background: rgba(239, 68, 68, 0.9);
+color: white;
+padding: 10px 30px;
+font-size: 24px;
+font-weight: bold;
+border-radius: 8px;
+z-index: 10;
+letter-spacing: 2px;
+box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+.product-card.sold-out .add-to-cart-btn {
+background: #9ca3af !important;
+cursor: not-allowed;
+pointer-events: none;
+}
+.toggle-switch {
+position: relative;
+width: 50px;
+height: 26px;
+appearance: none;
+background: #d1d5db;
+border-radius: 9999px;
+cursor: pointer;
+transition: background 0.3s ease;
+}
+.toggle-switch:checked {
+background: #10b981;
+}
+.toggle-switch::before {
+content: '';
+position: absolute;
+top: 3px;
+left: 3px;
+width: 20px;
+height: 20px;
+background: white;
+border-radius: 50%;
+transition: transform 0.3s ease;
+box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.toggle-switch:checked::before {
+transform: translateX(24px);
+}
+.status-badge {
+padding: 4px 12px;
+border-radius: 12px;
+font-size: 12px;
+font-weight: 600;
+}
+.status-active {
+background: #d1fae5;
+color: #059669;
+}
+.status-sold-out {
+background: #fee2e2;
+color: #dc2626;
+}
+</style>
 </head>
 <body class="bg-gray-50 text-gray-800">
-
-    <!-- LOADING OVERLAY -->
-    <div id="loading-overlay" class="loading-overlay">
-        <div class="spinner"></div>
-        <p class="loading-text" id="loading-text">Cargando...</p>
-    </div>
-
-    <!-- LOGO SECTION -->
-    <div class="top-logo-section">
-        <div class="container mx-auto px-4 text-center">
-            <div class="cursor-pointer" onclick="showSection('shop')">
-                <img src="logo.png" alt="100 Pre Wuapa Logo" class="logo-img mx-auto">
-            </div>
-        </div>
-    </div>
-
-    <!-- Navigation -->
-    <nav class="bg-white shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-3 flex justify-center items-center">
-            <div class="flex items-center space-x-6">
-                <button onclick="showSection('shop')" class="text-gray-600 hover:text-pink-500 font-medium transition flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    Productos
-                </button>
-                <button onclick="toggleCart()" class="relative text-gray-600 hover:text-pink-500 transition flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    Carrito
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transform scale-0 transition-transform duration-200">0</span>
-                </button>
-                <button id="admin-btn" onclick="checkAdminAccess()" class="text-gray-400 hover:text-gray-600 text-sm flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    <span id="admin-btn-text">Admin</span>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content Area -->
-    <main class="container mx-auto px-4 py-8 min-h-screen">
-        
-        <!-- SHOP SECTION -->
-        <div id="shop-section" class="fade-in">
-            
-            <!-- HERO CAROUSEL SECTION -->
-            <div class="mb-12">
-                <div class="hero-carousel rounded-2xl shadow-2xl overflow-hidden relative" id="heroCarousel">
-                    
-                    <!-- Slide 1 -->
-                    <div class="hero-slide active bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-600">
-                        <div class="grid md:grid-cols-2 gap-0">
-                            <div class="p-8 md:p-12 flex flex-col justify-center text-white">
-                                <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">Cuida tu cabello como se merece</h1>
-                                <p class="text-lg md:text-xl mb-6 text-pink-100">Descubre los mejores productos profesionales y tips expertos para mantener tu cabello saludable y brillante.</p>
-                                <button onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})" class="bg-white text-pink-600 font-bold py-3 px-8 rounded-full hover:bg-pink-50 transition shadow-lg self-start">Ver Productos</button>
-                            </div>
-                            <div class="hidden md:block relative">
-                                <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&h=600&fit=crop" alt="Hair Care" class="w-full h-full object-cover">
-                                <div class="absolute inset-0 bg-gradient-to-r from-transparent to-pink-600/20"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Slide 2 -->
-                    <div class="hero-slide bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600">
-                        <div class="grid md:grid-cols-2 gap-0">
-                            <div class="p-8 md:p-12 flex flex-col justify-center text-white">
-                                <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">Productos 100% Profesionales</h1>
-                                <p class="text-lg md:text-xl mb-6 text-purple-100">Calidad garantizada con las mejores marcas del mercado para que luzcas espectacular todos los días.</p>
-                                <button onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})" class="bg-white text-purple-600 font-bold py-3 px-8 rounded-full hover:bg-purple-50 transition shadow-lg self-start">Explorar Ahora</button>
-                            </div>
-                            <div class="hidden md:block relative">
-                                <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&h=600&fit=crop" alt="Professional Products" class="w-full h-full object-cover">
-                                <div class="absolute inset-0 bg-gradient-to-r from-transparent to-purple-600/20"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Slide 3 -->
-                    <div class="hero-slide bg-gradient-to-r from-fuchsia-600 via-pink-600 to-rose-600">
-                        <div class="grid md:grid-cols-2 gap-0">
-                            <div class="p-8 md:p-12 flex flex-col justify-center text-white">
-                                <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">Transforma tu Look Hoy</h1>
-                                <p class="text-lg md:text-xl mb-6 text-fuchsia-100">Asesoría personalizada y los mejores tratamientos para que tu cabello luzca increíble.</p>
-                                <button onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})" class="bg-white text-fuchsia-600 font-bold py-3 px-8 rounded-full hover:bg-fuchsia-50 transition shadow-lg self-start">Comenzar Ahora</button>
-                            </div>
-                            <div class="hidden md:block relative">
-                                <img src="https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=800&h=600&fit=crop" alt="Hair Transformation" class="w-full h-full object-cover">
-                                <div class="absolute inset-0 bg-gradient-to-r from-transparent to-fuchsia-600/20"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Slide 4 -->
-                    <div class="hero-slide bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500">
-                        <div class="grid md:grid-cols-2 gap-0">
-                            <div class="p-8 md:p-12 flex flex-col justify-center text-white">
-                                <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">Ofertas Especiales</h1>
-                                <p class="text-lg md:text-xl mb-6 text-rose-100">Aprovecha nuestras promociones y lleva los mejores productos al mejor precio.</p>
-                                <button onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})" class="bg-white text-rose-600 font-bold py-3 px-8 rounded-full hover:bg-rose-50 transition shadow-lg self-start">Ver Ofertas</button>
-                            </div>
-                            <div class="hidden md:block relative">
-                                <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800&h=600&fit=crop" alt="Special Offers" class="w-full h-full object-cover">
-                                <div class="absolute inset-0 bg-gradient-to-r from-transparent to-rose-600/20"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Carousel Controls -->
-                    <button class="carousel-btn prev" onclick="changeSlide(-1)">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <button class="carousel-btn next" onclick="changeSlide(1)">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-
-                    <!-- Indicators -->
-                    <div class="carousel-indicators">
-                        <div class="indicator active" onclick="goToSlide(0)"></div>
-                        <div class="indicator" onclick="goToSlide(1)"></div>
-                        <div class="indicator" onclick="goToSlide(2)"></div>
-                        <div class="indicator" onclick="goToSlide(3)"></div>
-                    </div>
-                </div>
-
-                <!-- Tips Section -->
-                <div class="mb-8 mt-8">
-                    <h2 class="text-3xl font-bold text-center mb-2"><span class="gradient-text">Tips de Cuidado Capilar</span></h2>
-                    <p class="text-gray-500 text-center mb-8">Consejos profesionales para mantener tu cabello hermoso</p>
-                    
-                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div class="tip-card bg-white rounded-xl shadow-lg p-6 text-center">
-                            <div class="w-16 h-16 bg-gradient-to-br from-pink-400 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                                </svg>
-                            </div>
-                            <h3 class="font-bold text-lg mb-2 text-gray-800">Hidratación</h3>
-                            <p class="text-sm text-gray-600">Usa mascarillas hidratantes al menos una vez por semana.</p>
-                        </div>
-
-                        <div class="tip-card bg-white rounded-xl shadow-lg p-6 text-center">
-                            <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                            </div>
-                            <h3 class="font-bold text-lg mb-2 text-gray-800">Protección Solar</h3>
-                            <p class="text-sm text-gray-600">Protege tu cabello del sol con productos con UV.</p>
-                        </div>
-
-                        <div class="tip-card bg-white rounded-xl shadow-lg p-6 text-center">
-                            <div class="w-16 h-16 bg-gradient-to-br from-fuchsia-400 to-fuchsia-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-8.486a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
-                                </svg>
-                            </div>
-                            <h3 class="font-bold text-lg mb-2 text-gray-800">Corte Regular</h3>
-                            <p class="text-sm text-gray-600">Corta las puntas cada 6-8 semanas.</p>
-                        </div>
-
-                        <div class="tip-card bg-white rounded-xl shadow-lg p-6 text-center">
-                            <div class="w-16 h-16 bg-gradient-to-br from-pink-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                </svg>
-                            </div>
-                            <h3 class="font-bold text-lg mb-2 text-gray-800">Productos Profesionales</h3>
-                            <p class="text-sm text-gray-600">Usa productos de calidad profesional.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Info Banner -->
-                <div class="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl shadow-xl p-8 text-white">
-                    <div class="grid md:grid-cols-2 gap-6 text-center">
-                        <div>
-                            <div class="text-3xl font-bold text-pink-400 mb-2">100%</div>
-                            <div class="text-gray-300">Productos Profesionales</div>
-                        </div>
-                        <div>
-                            <div class="text-3xl font-bold text-purple-400 mb-2">Asesoría</div>
-                            <div class="text-gray-300">Personalizada Gratis</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Products Section -->
-            <div class="mb-10">
-                <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Nuestros <span class="gradient-text">Productos</span></h2>
-                <p class="text-gray-500 text-center mb-8">Eleva tu estilo al siguiente nivel con nuestros productos de calidad</p>
-            </div>
-            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
-        </div>
-
-        <!-- ADMIN LOGIN SECTION -->
-        <div id="admin-login-section" class="hidden fade-in max-w-md mx-auto mt-10 bg-white p-8 rounded-xl shadow-lg">
-            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Acceso Administrativo</h2>
-            <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
-                    <input type="email" id="admin-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" required placeholder="admin@ejemplo.com">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
-                    <input type="password" id="admin-pass" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" required placeholder="••••••••">
-                </div>
-                <button type="submit" id="login-btn" class="w-full bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white font-bold py-2 px-4 rounded-lg hover:from-pink-600 hover:to-fuchsia-700 transition">Ingresar</button>
-            </form>
-            <p id="login-error" class="text-red-500 text-sm mt-4 text-center hidden">Credenciales incorrectas</p>
-        </div>
-
-        <!-- ADMIN DASHBOARD SECTION -->
-        <div id="admin-dashboard-section" class="hidden fade-in">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-bold text-gray-800">Gestión de Productos</h2>
-                <button onclick="logoutAdmin()" class="text-red-500 hover:text-red-700 font-medium">Cerrar Sesión</button>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Add Product Form -->
-                <div class="bg-white p-6 rounded-xl shadow-lg h-fit">
-                    <h3 class="text-lg font-bold mb-4 border-b pb-2 text-pink-600">Agregar Nuevo Producto</h3>
-                    <form id="add-product-form" onsubmit="addProduct(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Nombre del Producto</label>
-                            <input type="text" id="new-prod-name" class="mt-1 w-full border rounded-md p-2" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Descripción</label>
-                            <textarea id="new-prod-desc" class="mt-1 w-full border rounded-md p-2" rows="3" required></textarea>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Precio ($)</label>
-                                <input type="number" id="new-prod-price" class="mt-1 w-full border rounded-md p-2" step="0.01" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">¿Tiene Variantes?</label>
-                                <select id="new-prod-has-variants" onchange="toggleVariantsField()" class="mt-1 w-full border rounded-md p-2">
-                                    <option value="no">No</option>
-                                    <option value="yes">Sí</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div id="variants-field" class="hidden">
-                            <label class="block text-sm font-medium text-gray-700">Variantes (separadas por coma)</label>
-                            <input type="text" id="new-prod-variants" class="mt-1 w-full border rounded-md p-2" placeholder="Ej: Negro, Rubio, Fresa, Rojo">
-                            <p class="text-xs text-gray-500 mt-1">Separa cada variante con una coma</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Imagen</label>
-                            <input type="file" id="new-prod-img" accept="image/*" class="mt-1 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100" required>
-                        </div>
-                        <button type="submit" id="add-product-btn" class="w-full bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white font-bold py-2 rounded-md hover:from-pink-600 hover:to-fuchsia-700 transition">Guardar Producto</button>
-                    </form>
-                </div>
-
-                <!-- Product List -->
-                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-lg font-bold mb-4 border-b pb-2 text-pink-600">Productos Existentes</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-100 text-gray-600 text-sm">
-                                    <th class="p-3">Img</th>
-                                    <th class="p-3">Nombre</th>
-                                    <th class="p-3">Precio</th>
-                                    <th class="p-3">Estado</th>
-                                    <th class="p-3">Activo</th>
-                                    <th class="p-3">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-product-list"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- FLOATING CHECKOUT BUTTON -->
-    <button id="floating-checkout-btn" onclick="openCheckoutModal()" class="floating-checkout hidden bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white font-bold py-4 px-8 rounded-full flex items-center gap-3 hover:from-pink-600 hover:to-fuchsia-700 transition-all">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-        </svg>
-        <span>Completar Compra</span>
-        <span id="floating-total" class="bg-white text-pink-600 px-3 py-1 rounded-full text-sm font-bold">$0.00</span>
-    </button>
-
-    <!-- CART SIDEBAR -->
-    <div id="cart-sidebar" class="fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col">
-        <div class="p-4 bg-gradient-to-r from-pink-500 to-fuchsia-600 border-b flex justify-between items-center">
-            <h2 class="text-xl font-bold text-white">Tu Carrito</h2>
-            <button onclick="toggleCart()" class="text-white hover:text-pink-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-        <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-4">
-            <p class="text-center text-gray-400 mt-10">Tu carrito está vacío</p>
-        </div>
-        <div class="p-4 bg-gray-50 border-t">
-            <div class="flex justify-between mb-2 text-gray-600">
-                <span>Subtotal:</span>
-                <span id="cart-subtotal">$0.00</span>
-            </div>
-            <button onclick="openCheckoutModal()" class="w-full bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white font-bold py-3 rounded-lg hover:from-pink-600 hover:to-fuchsia-700 transition shadow-lg">Completar Compra</button>
-        </div>
-    </div>
-
-    <!-- CHECKOUT MODAL -->
-    <div id="checkout-modal" class="fixed inset-0 modal z-50 hidden flex items-center justify-center p-4" onclick="if(event.target === this) closeCheckoutModal()">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
-                <h2 class="text-2xl font-bold text-gray-800">Finalizar Pedido</h2>
-                <button onclick="closeCheckoutModal()" class="text-gray-400 hover:text-gray-600 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            
-            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="space-y-4">
-                    <h3 class="font-bold text-gray-700 border-b pb-2 text-pink-600">Datos del Cliente</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="text" id="checkout-name" placeholder="Nombre" class="border p-2 rounded w-full">
-                        <input type="text" id="checkout-surname" placeholder="Apellidos" class="border p-2 rounded w-full">
-                    </div>
-                    <input type="tel" id="checkout-phone" placeholder="Número Celular" class="border p-2 rounded w-full">
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Entrega</label>
-                        <div class="bg-pink-50 border border-pink-200 text-pink-700 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Solo Servicio a Domicilio
-                        </div>
-                        <input type="hidden" id="checkout-delivery-type" value="home">
-                    </div>
-
-                    <div id="zone-section">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Zona de Entrega</label>
-                        <select id="checkout-zone" onchange="calculateTotal()" class="border p-2 rounded w-full bg-white">
-                            <option value="center">Centro de la Ciudad ($300)</option>
-                            <option value="other">Otra Zona ($400)</option>
-                        </select>
-                    </div>
-
-                    <input type="text" id="checkout-address" placeholder="Dirección exacta de entrega" class="border p-2 rounded w-full">
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Método de Pago</label>
-                        <select id="checkout-payment" class="border p-2 rounded w-full bg-white">
-                            <option value="Efectivo">Efectivo</option>
-                            <option value="Transferencia">Transferencia</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="bg-gray-50 p-4 rounded-lg h-fit">
-                     <h3 class="font-bold text-gray-700 border-b pb-2 mb-4 text-pink-600">Resumen del Pedido</h3>
-                    <div id="summary-products-list" class="mb-4 space-y-2 text-sm text-gray-600 max-h-40 overflow-y-auto"></div>
-                    
-                    <div class="space-y-2 border-t pt-4">
-                        <div class="flex justify-between">
-                            <span>Subtotal Productos:</span>
-                            <span id="summary-subtotal" class="font-medium">$0.00</span>
-                        </div>
-                        <div class="flex justify-between text-pink-600">
-                            <span>Costo Domicilio:</span>
-                            <span id="summary-shipping">$0.00</span>
-                        </div>
-                        <div class="flex justify-between text-xl font-bold text-gray-800 pt-2 border-t">
-                            <span>TOTAL A PAGAR:</span>
-                            <span id="summary-total">$0.00</span>
-                        </div>
-                    </div>
-
-                    <button onclick="sendToWhatsapp()" id="whatsapp-btn" class="w-full mt-6 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-8.68-2.031-9.67-.272-.099-.47-.149-.669-.149-.198 0-.42.001-.643.001-.223 0-.586.085-.893.421-.307.336-1.178 1.151-1.178 2.807 0 1.657 1.208 3.257 1.376 3.48.169.223 2.379 3.632 5.763 5.093 2.253.973 2.713.779 3.207.73.495-.05 1.585-.648 1.808-1.271.223-.623.223-1.159.156-1.271z"/></svg>
-                        Enviar Pedido por WhatsApp
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- FULL IMAGE MODAL -->
-    <div id="full-image-modal" class="fixed inset-0 full-image-modal z-[60] hidden flex items-center justify-center p-4" onclick="closeFullImageModal()">
-        <div class="relative">
-            <img id="full-image-src" src="" alt="Producto completo" class="animate-fade-in">
-            <button onclick="closeFullImageModal()" class="absolute -top-12 right-0 text-white hover:text-pink-400 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    <script>
-    // --- 1. CONFIGURACIÓN DE SUPABASE ---
-    const SUPABASE_URL = 'https://qtcyuvbhidttoxxctrlo.supabase.co'; 
-    const SUPABASE_ANON_KEY = 'sb_publishable_DNd3MsCMPCBRUdHdXJNeAg_c0a1htqC';
-    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const auth = db.auth;
-
-    // --- 2. VARIABLES DE ESTADO ---
-    let products = []; 
-    let cart = []; 
-    let isAdmin = false;
-
-    // --- FUNCIONES DE LOADING ---
-    function showLoading(message = 'Cargando...') {
-        const overlay = document.getElementById('loading-overlay');
-        const text = document.getElementById('loading-text');
-        text.textContent = message;
-        overlay.classList.add('active');
-    }
-
-    function hideLoading() {
-        const overlay = document.getElementById('loading-overlay');
-        overlay.classList.remove('active');
-    }
-
-    function setButtonLoading(buttonId, isLoading) {
-        const btn = document.getElementById(buttonId);
-        if (btn) {
-            if (isLoading) {
-                btn.classList.add('btn-loading');
-                btn.disabled = true;
-            } else {
-                btn.classList.remove('btn-loading');
-                btn.disabled = false;
-            }
-        }
-    }
-
-    // --- VERIFICAR SESIÓN AL CARGAR ---
-    async function checkAdminSession() {
-        const { data: { session } } = await auth.getSession();
-        if (session) {
-            isAdmin = true;
-            updateAdminButtonText();
-        }
-    }
-
-    // --- ACTUALIZAR TEXTO DEL BOTÓN ADMIN ---
-    function updateAdminButtonText() {
-        const btnText = document.getElementById('admin-btn-text');
-        if (isAdmin) {
-            btnText.textContent = 'Dashboard';
-            document.getElementById('admin-btn').classList.remove('text-gray-400');
-            document.getElementById('admin-btn').classList.add('text-pink-500');
-        } else {
-            btnText.textContent = 'Admin';
-            document.getElementById('admin-btn').classList.add('text-gray-400');
-            document.getElementById('admin-btn').classList.remove('text-pink-500');
-        }
-    }
-
-    // --- VERIFICAR ACCESO ADMIN ---
-    async function checkAdminAccess() {
-        if (isAdmin) {
-            showSection('admin-dashboard');
-            renderAdminProducts();
-        } else {
-            showSection('admin-login');
-        }
-    }
-
-    // --- LOGIN CON SUPABASE AUTH ---
-    async function handleAdminLogin(e) {
-        e.preventDefault();
-        setButtonLoading('login-btn', true);
-        showLoading('Iniciando sesión...');
-        
-        const email = document.getElementById('admin-email').value;
-        const pass = document.getElementById('admin-pass').value;
-        
-        try {
-            const { data, error } = await auth.signInWithPassword({
-                email: email,
-                password: pass
-            });
-
-            if (error) {
-                throw error;
-            }
-
-            if (data.user) {
-                isAdmin = true;
-                updateAdminButtonText();
-                document.getElementById('admin-login-form').reset();
-                document.getElementById('login-error').classList.add('hidden');
-                showSection('admin-dashboard');
-                renderAdminProducts();
-            }
-        } catch (err) {
-            console.error('Error de login:', err.message);
-            document.getElementById('login-error').textContent = err.message || 'Credenciales incorrectas';
-            document.getElementById('login-error').classList.remove('hidden');
-        } finally {
-            hideLoading();
-            setButtonLoading('login-btn', false);
-        }
-    }
-
-    // --- LOGOUT CON SUPABASE AUTH ---
-    async function logoutAdmin() {
-        showLoading('Cerrando sesión...');
-        await auth.signOut();
-        isAdmin = false;
-        updateAdminButtonText();
-        document.getElementById('admin-login-form').reset();
-        showSection('shop');
-        hideLoading();
-    }
-
-    // --- ESCUCHAR CAMBIOS DE AUTENTICACIÓN ---
-    auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN') {
-            isAdmin = true;
-            updateAdminButtonText();
-        } else if (event === 'SIGNED_OUT') {
-            isAdmin = false;
-            updateAdminButtonText();
-        }
-    });
-
-    // --- CAROUSEL VARIABLES ---
-    let currentSlide = 0;
-    let slideInterval;
-    const slides = document.querySelectorAll('.hero-slide');
-    const indicators = document.querySelectorAll('.indicator');
-    const totalSlides = slides.length;
-
-    // --- CAROUSEL FUNCTIONS ---
-    function showSlide(index) {
-        slides.forEach((slide, i) => {
-            slide.classList.remove('active');
-            if (i === index) slide.classList.add('active');
-        });
-        indicators.forEach((indicator, i) => {
-            indicator.classList.remove('active');
-            if (i === index) indicator.classList.add('active');
-        });
-        currentSlide = index;
-    }
-
-    function changeSlide(direction) {
-        let newIndex = currentSlide + direction;
-        if (newIndex >= totalSlides) newIndex = 0;
-        else if (newIndex < 0) newIndex = totalSlides - 1;
-        showSlide(newIndex);
-        resetInterval();
-    }
-
-    function goToSlide(index) {
-        showSlide(index);
-        resetInterval();
-    }
-
-    function nextSlide() { changeSlide(1); }
-
-    function resetInterval() {
-        clearInterval(slideInterval);
-        slideInterval = setInterval(nextSlide, 5000);
-    }
-
-    document.addEventListener('DOMContentLoaded', function() { resetInterval(); });
-
-    // --- CARGA DE DATOS ---
-    async function fetchProducts() {
-        showLoading('Cargando productos...');
-        try {
-            const { data, error } = await db.from('productos').select('*').order('created_at', { ascending: false });
-            if (error) throw error;
-            products = data || [];
-            renderShop();
-            if (isAdmin) {
-                renderAdminProducts();
-            }
-        } catch (err) {
-            console.error("Error cargando productos:", err.message);
-            alert('Error al cargar productos: ' + err.message);
-        } finally {
-            hideLoading();
-        }
-    }
-
-    // --- FUNCIONES DE NAVEGACIÓN ---
-    function showSection(sectionId) {
-        document.getElementById('shop-section').classList.add('hidden');
-        document.getElementById('admin-login-section').classList.add('hidden');
-        document.getElementById('admin-dashboard-section').classList.add('hidden');
-        const section = document.getElementById(sectionId + '-section');
-        if (section) section.classList.remove('hidden');
-    }
-
-    // --- GESTIÓN DE PRODUCTOS ---
-    function toggleVariantsField() {
-        const hasVariants = document.getElementById('new-prod-has-variants').value;
-        const variantsField = document.getElementById('variants-field');
-        if (hasVariants === 'yes') {
-            variantsField.classList.remove('hidden');
-        } else {
-            variantsField.classList.add('hidden');
-        }
-    }
-
-    async function addProduct(e) {
-        e.preventDefault();
-        setButtonLoading('add-product-btn', true);
-        showLoading('Guardando producto...');
-        
-        const fileInput = document.getElementById('new-prod-img');
-        const name = document.getElementById('new-prod-name').value;
-        const desc = document.getElementById('new-prod-desc').value;
-        const price = parseFloat(document.getElementById('new-prod-price').value);
-        const hasVariants = document.getElementById('new-prod-has-variants').value;
-        const variants = document.getElementById('new-prod-variants').value;
-
-        try {
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = async function(event) {
-                    const newProduct = {
-                        nombre: name,
-                        descripcion: desc,
-                        precio: price,
-                        imagen: event.target.result,
-                        variedades: hasVariants === 'yes' ? variants : '',
-                        activo: true
-                    };
-
-                    const { error } = await db.from('productos').insert([newProduct]);
-
-                    if (error) {
-                        throw error;
-                    } else {
-                        document.getElementById('add-product-form').reset();
-                        document.getElementById('variants-field').classList.add('hidden');
-                        await fetchProducts();
-                        alert('Producto agregado correctamente');
-                    }
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            }
-        } catch (err) {
-            alert('Error al guardar: ' + err.message);
-        } finally {
-            hideLoading();
-            setButtonLoading('add-product-btn', false);
-        }
-    }
-
-    async function toggleProductStatus(id, currentStatus) {
-        showLoading('Actualizando estado...');
-        try {
-            const { error } = await db.from('productos')
-                .update({ activo: !currentStatus })
-                .eq('id', id);
-            
-            if (error) throw error;
-            await fetchProducts();
-        } catch (err) {
-            alert('Error al actualizar: ' + err.message);
-        } finally {
-            hideLoading();
-        }
-    }
-
-    async function deleteProduct(id) {
-        if (!confirm('¿Eliminar este producto?')) return;
-        
-        showLoading('Eliminando producto...');
-        try {
-            const { error } = await db.from('productos').delete().eq('id', id);
-            if (error) throw error;
-            await fetchProducts();
-        } catch (err) {
-            alert('Error al eliminar: ' + err.message);
-        } finally {
-            hideLoading();
-        }
-    }
-
-    function renderAdminProducts() {
-        const tbody = document.getElementById('admin-product-list');
-        tbody.innerHTML = products.map(p => {
-            const variantsDisplay = p.variedades && p.variedades.trim() !== ''
-                ? `<span class="variant-badge">${p.variedades}</span>` 
-                : '<span class="text-gray-400">-</span>';
-            
-            const statusBadge = p.activo !== false
-                ? '<span class="status-badge status-active">Activo</span>'
-                : '<span class="status-badge status-sold-out">Agotado</span>';
-            
-            return `
-                <tr class="border-b ${p.activo === false ? 'bg-red-50' : ''}">
-                    <td class="p-3"><img src="${p.imagen}" class="w-10 h-10 object-cover rounded"></td>
-                    <td class="p-3 font-medium">${p.nombre}</td>
-                    <td class="p-3">$${p.precio}</td>
-                    <td class="p-3">${statusBadge}</td>
-                    <td class="p-3">
-                        <label class="flex items-center cursor-pointer">
-                            <input type="checkbox" class="toggle-switch" 
-                                ${p.activo !== false ? 'checked' : ''} 
-                                onchange="toggleProductStatus(${p.id}, ${p.activo !== false})">
-                        </label>
-                    </td>
-                    <td class="p-3">
-                        <button onclick="deleteProduct(${p.id})" class="text-red-500 hover:underline">Eliminar</button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    }
-
-    // --- CARRITO Y TIENDA ---
-    function toggleCart() {
-        const sidebar = document.getElementById('cart-sidebar');
-        sidebar.classList.toggle('translate-x-full');
-    }
-
-    function openVariantModal(productId) {
-        const product = products.find(p => p.id === productId);
-        if (!product) return;
-
-        const modal = document.createElement('div');
-        modal.id = 'variant-modal';
-        modal.className = 'fixed inset-0 modal z-[70] flex items-center justify-center p-4';
-        modal.innerHTML = `
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-                <div class="p-6 border-b flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-gray-800">${product.nombre}</h3>
-                    <button onclick="closeVariantModal()" class="text-gray-400 hover:text-gray-600">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="p-6">
-                    <img src="${product.imagen}" class="w-full h-48 object-cover rounded-lg mb-4">
-                    <p class="text-gray-600 mb-4">${product.descripcion || ''}</p>
-                    <p class="text-2xl font-bold text-pink-600 mb-4">$${product.precio}</p>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Selecciona una variante:</label>
-                        <div class="variant-selector" id="variant-options">
-                            ${product.variedades.split(',').map(v => `
-                                <button class="variant-btn" onclick="selectVariant(this, '${v.trim()}')">${v.trim()}</button>
-                            `).join('')}
-                        </div>
-                        <p id="variant-error" class="variant-required hidden">Por favor selecciona una variante</p>
-                    </div>
-                </div>
-                <div class="p-6 border-t bg-gray-50">
-                    <button onclick="addToCartWithVariant(${product.id})" class="w-full bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white font-bold py-3 rounded-lg hover:from-pink-600 hover:to-fuchsia-700 transition">
-                        Agregar al Carrito
-                    </button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeVariantModal() {
-        const modal = document.getElementById('variant-modal');
-        if (modal) {
-            modal.remove();
-            document.body.style.overflow = '';
-        }
-    }
-
-    let selectedVariant = null;
-
-    function selectVariant(btn, variant) {
-        document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        selectedVariant = variant;
-        document.getElementById('variant-error').classList.add('hidden');
-    }
-
-    function addToCartWithVariant(productId) {
-        if (!selectedVariant) {
-            document.getElementById('variant-error').classList.remove('hidden');
-            return;
-        }
-
-        const product = products.find(p => p.id === productId);
-        if (product) {
-            const existingItem = cart.find(item => item.id === productId && item.variant === selectedVariant);
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({ ...product, quantity: 1, variant: selectedVariant });
-            }
-            closeVariantModal();
-            selectedVariant = null;
-            updateCartUI();
-            
-            const count = document.getElementById('cart-count');
-            count.classList.remove('scale-0');
-            count.classList.add('scale-100');
-            setTimeout(() => {
-                count.classList.remove('scale-100');
-                count.classList.add('scale-0');
-            }, 200);
-        }
-    }
-
-    function addToCart(productId) {
-        const product = products.find(p => p.id === productId);
-        if (!product) return;
-
-        if (product.activo === false) {
-            alert('Este producto está agotado temporalmente');
-            return;
-        }
-
-        if (product.variedades && product.variedades.trim() !== '') {
-            openVariantModal(productId);
-        } else {
-            const existingItem = cart.find(item => item.id === productId);
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({ ...product, quantity: 1, variant: null });
-            }
-            updateCartUI();
-            
-            const count = document.getElementById('cart-count');
-            count.classList.remove('scale-0');
-            count.classList.add('scale-100');
-            setTimeout(() => {
-                count.classList.remove('scale-100');
-                count.classList.add('scale-0');
-            }, 200);
-        }
-    }
-
-    function removeFromCart(index) {
-        const item = cart[index];
-        if (item.quantity > 1) {
-            item.quantity -= 1;
-        } else {
-            cart.splice(index, 1);
-        }
-        updateCartUI();
-    }
-
-    function removeItemFromCart(index) {
-        cart.splice(index, 1);
-        updateCartUI();
-    }
-
-    function updateCartUI() {
-        const cartItems = document.getElementById('cart-items');
-        const cartCount = document.getElementById('cart-count');
-        const cartSubtotal = document.getElementById('cart-subtotal');
-        const floatingTotal = document.getElementById('floating-total');
-        const floatingBtn = document.getElementById('floating-checkout-btn');
-
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        cartCount.innerText = totalItems;
-        
-        if (cart.length === 0) {
-            cartItems.innerHTML = '<p class="text-center text-gray-400 mt-10">Tu carrito está vacío</p>';
-            cartCount.classList.add('scale-0');
-            cartCount.classList.remove('scale-100');
-            floatingBtn.classList.add('hidden');
-        } else {
-            const total = cart.reduce((sum, item) => sum + (item.precio * item.quantity), 0);
-            cartSubtotal.innerText = `$${total.toFixed(2)}`;
-            floatingTotal.innerText = `$${total.toFixed(2)}`;
-            floatingBtn.classList.remove('hidden');
-
-            cartItems.innerHTML = cart.map((item, index) => `
-                <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
-                    <img src="${item.imagen}" class="w-14 h-14 object-cover rounded">
-                    <div class="flex-1 min-w-0">
-                        <h4 class="font-bold text-sm truncate">${item.nombre}</h4>
-                        ${item.variant ? `<span class="variant-badge">${item.variant}</span>` : ''}
-                        <p class="text-pink-500 font-bold">$${item.precio}</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="removeFromCart(${index})" class="quantity-btn">−</button>
-                        <span class="font-bold text-sm w-6 text-center">${item.quantity}</span>
-                        <button onclick="addToCart(${item.id})" class="quantity-btn">+</button>
-                    </div>
-                    <button onclick="removeItemFromCart(${index})" class="text-gray-400 hover:text-red-500 ml-1">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
-                </div>
-            `).join('');
-        }
-    }
-
-    function renderShop() {
-        const grid = document.getElementById('products-grid');
-        grid.innerHTML = products.map(product => {
-            const hasVariants = product.variedades && product.variedades.trim() !== '';
-            const isSoldOut = product.activo === false;
-            const variantsHtml = hasVariants 
-                ? `<div class="mt-2 text-xs text-gray-500">Disponibles: ${product.variedades}</div>`
-                : '';
-            
-            const soldOutClass = isSoldOut ? 'product-card sold-out' : 'product-card';
-            const buttonText = isSoldOut ? 'Agotado' : (hasVariants ? 'Seleccionar' : 'Agregar');
-            
-            return `
-                <div class="${soldOutClass} bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition border-2 border-transparent hover:border-pink-300">
-                    <div class="product-image-container relative" onclick="${isSoldOut ? '' : `openFullImage('${product.imagen}')`}">
-                        <img src="${product.imagen}" class="h-64 w-full object-cover" alt="${product.nombre}">
-                        ${!isSoldOut ? `
-                            <div class="image-hint">
-                                <div class="hint-text">👁️ Pulsa para ver</div>
-                            </div>
-                        ` : ''}
-                    </div>
-                    <div class="p-5 flex-1 flex flex-col">
-                        <h3 class="text-lg font-bold text-gray-800">${product.nombre}</h3>
-                        <p class="text-gray-500 text-sm flex-1">${product.descripcion || ''}</p>
-                        ${variantsHtml}
-                        <div class="mt-4 flex items-center justify-between">
-                            <span class="text-xl font-bold ${isSoldOut ? 'text-gray-400' : 'text-pink-600'}">$${product.precio}</span>
-                            <button onclick="addToCart(${product.id})" class="add-to-cart-btn bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white px-4 py-2 rounded-lg text-sm hover:from-pink-600 hover:to-fuchsia-700 transition">
-                                ${buttonText}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    // --- MODAL DE CHECKOUT ---
-    function closeCheckoutModal() {
-        document.getElementById('checkout-modal').classList.add('hidden');
-    }
-
-    function openCheckoutModal() {
-        const modal = document.getElementById('checkout-modal');
-        const summaryItems = document.getElementById('summary-products-list');
-        
-        if (summaryItems && cart.length > 0) {
-            summaryItems.innerHTML = cart.map(item => `
-                <div class="flex justify-between text-sm mb-2 border-b border-gray-100 pb-1">
-                    <span>
-                        ${item.quantity} x ${item.nombre}
-                        ${item.variant ? `<span class="variant-badge ml-1">${item.variant}</span>` : ''}
-                    </span>
-                    <span class="font-semibold">$${(item.precio * item.quantity).toFixed(2)}</span>
-                </div>
-            `).join('');
-        } else if (summaryItems) {
-            summaryItems.innerHTML = '<p class="text-gray-400">Carrito vacío</p>';
-        }
-
-        modal.classList.remove('hidden');
-        calculateTotal();
-    }
-
-    function calculateTotal() {
-        const subtotal = cart.reduce((sum, item) => sum + (item.precio * item.quantity), 0);
-        const zone = document.getElementById('checkout-zone').value;
-        const zoneSection = document.getElementById('zone-section');
-        
-        if(zoneSection) zoneSection.classList.remove('hidden');
-        
-        let shipping = (zone === 'center') ? 300 : 400;
-
-        const total = subtotal + shipping;
-
-        document.getElementById('summary-subtotal').innerText = `$${subtotal.toFixed(2)}`;
-        document.getElementById('summary-shipping').innerText = `$${shipping.toFixed(2)}`;
-        document.getElementById('summary-total').innerText = `$${total.toFixed(2)}`;
-    }
-
-    // ✅ FUNCIÓN ACTUALIZADA: Emojis y número nuevo
-    async function sendToWhatsapp() {
-        const name = document.getElementById('checkout-name').value;
-        const phone = document.getElementById('checkout-phone').value;
-        const address = document.getElementById('checkout-address').value;
-        const zone = document.getElementById('checkout-zone').value;
-        const zoneText = zone === 'center' ? 'Centro' : 'Otra Zona';
-        const total = document.getElementById('summary-total').innerText;
-        const payment = document.getElementById('checkout-payment').value;
-        
-        if (!name || !phone || !address) {
-            alert('Por favor completa tus datos y la dirección de entrega');
-            return;
-        }
-
-        setButtonLoading('whatsapp-btn', true);
-        showLoading('Generando pedido...');
-        
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        // ✅ Emojis explícitos en el mensaje
-        let message = '\ud83d\udecd\ufe0f *NUEVO PEDIDO - 100 PRE WUAPA* \ud83d\udecd\ufe0f\n\n';
-        message += '\ud83d\udc64 *Cliente:* ' + name + '\n';
-        message += '\ud83d\udcf1 *Teléfono:* ' + phone + '\n';
-        message += '\ud83d\udccd *Dirección:* ' + address + ' (' + zoneText + ')\n\n';
-        message += '\ud83d\udce6 *PRODUCTOS:*\n';
-        
-        cart.forEach(item => {
-            const itemTotal = (item.precio * item.quantity).toFixed(2);
-            const variantInfo = item.variant ? ' (' + item.variant + ')' : '';
-            if (item.quantity > 1) {
-                message += '\u25ab\ufe0f ' + item.quantity + ' x ' + item.nombre + variantInfo + ' - $' + itemTotal + '\n';
-            } else {
-                message += '\u25ab\ufe0f ' + item.nombre + variantInfo + ' - $' + item.precio + '\n';
-            }
-        });
-        
-        message += '\n\ud83d\udcb0 *TOTAL A PAGAR:* ' + total + '\n';
-        message += '\ud83d\udcb3 *Método de pago:* ' + payment;
-
-        const encodedMessage = encodeURIComponent(message);
-        // ✅ NÚMERO ACTUALIZADO
-        window.open('https://wa.me/5351164979?text=' + encodedMessage, '_blank');
-        
-        hideLoading();
-        setButtonLoading('whatsapp-btn', false);
-        closeCheckoutModal();
-    }
-
-    // --- FUNCIONES PARA IMAGEN COMPLETA ---
-    function openFullImage(imageSrc) {
-        const modal = document.getElementById('full-image-modal');
-        const img = document.getElementById('full-image-src');
-        img.src = imageSrc;
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeFullImageModal() {
-        const modal = document.getElementById('full-image-modal');
-        modal.classList.add('hidden');
-        document.body.style.overflow = '';
-    }
-
-    // Inicialización
-    checkAdminSession();
-    fetchProducts();
-    </script>
+<div id="loading-overlay" class="loading-overlay">
+<div class="spinner"></div>
+<p class="loading-text" id="loading-text">Cargando...</p>
+</div>
+<div class="top-logo-section">
+<div class="container mx-auto px-4 text-center">
+<div class="cursor-pointer" onclick="showSection('shop')">
+<img src="logo.png" alt="100 Pre Wuapa Logo" class="logo-img mx-auto">
+</div>
+</div>
+</div>
+<nav class="bg-white shadow-md sticky top-0 z-50">
+<div class="container mx-auto px-4 py-3 flex justify-center items-center">
+<div class="flex items-center space-x-6">
+<button onclick="showSection('shop')" class="text-gray-600 hover:text-pink-500 font-medium transition flex items-center gap-2">
+<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+</svg>
+Productos
+</button>
+<button onclick="toggleCart()" class="relative text-gray-600 hover:text-pink-500 transition flex items-center gap-2">
+<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+</svg>
+Carrito
+<span id="cart-count" class="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transform scale-0 transition-transform duration-200">0</span>
+</button>
+<button id="admin-btn" onclick="checkAdminAccess()" class="text-gray-400 hover:text-gray-600 text-sm flex items-center gap-2">
+<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+</svg>
+<span id="admin-btn-text">Admin</span>
+</button>
+</div>
+</div>
+</nav>
+<main class="container mx-auto px-4 py-8 min-h-screen">
+<div id="shop-section" class="fade-in">
+<div class="mb-12">
+<div class="hero-carousel rounded-2xl shadow-2xl overflow-hidden relative" id="heroCarousel">
+<div class="hero-slide active bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-600">
+<div class="grid md:grid-cols-2 gap-0">
+<div class="p-8 md:p-12 flex flex-col justify-center text-white">
+<h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">Cuida tu cabello como se merece</h1>
+<p class="text-lg md:text-xl mb-6 text-pink-100">Descubre los mejores productos profesionales y tips expertos para mantener tu cabello saludable y brillante.</p>
+<button onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})" class="bg-white text-pink-600 font-bold py-3 px-8 rounded-full hover:bg-pink-50 transition shadow-lg self-start">Ver Productos</button>
+</div>
+<div class="hidden md:block relative">
+<img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&h=600&fit=crop" alt="Hair Care" class="w-full h-full object-cover">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent to-pink-600/20"></div>
+</div>
+</div>
+</div>
+<div class="hero-slide bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600">
+<div class="grid md:grid-cols-2 gap-0">
+<div class="p-8 md:p-12 flex flex-col justify-center text-white">
+<h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">Productos 100% Profesionales</h1>
+<p class="text-lg md:text-xl mb-6 text-purple-100">Calidad garantizada con las mejores marcas del mercado para que luzcas espectacular todos los días.</p>
+<button onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})" class="bg-white text-purple-600 font-bold py-3 px-8 rounded-full hover:bg-purple-50 transition shadow-lg self-start">Explorar Ahora</button>
+</div>
+<div class="hidden md:block relative">
+<img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&h=600&fit=crop" alt="Professional Products" class="w-full h-full object-cover">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent to-purple-600/20"></div>
+</div>
+</div>
+</div>
+<div class="hero-slide bg-gradient-to-r from-fuchsia-600 via-pink-600 to-rose-600">
+<div class="grid md:grid-cols-2 gap-0">
+<div class="p-8 md:p-12 flex flex-col justify-center text-white">
+<h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">Transforma tu Look Hoy</h1>
+<p class="text-lg md:text-xl mb-6 text-fuchsia-100">Asesoría personalizada y los mejores tratamientos para que tu cabello luzca increíble.</p>
+<button onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})" class="bg-white text-fuchsia-600 font-bold py-3 px-8 rounded-full hover:bg-fuchsia-50 transition shadow-lg self-start">Comenzar Ahora</button>
+</div>
+<div class="hidden md:block relative">
+<img src="https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=800&h=600&fit=crop" alt="Hair Transformation" class="w-full h-full object-cover">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent to-fuchsia-600/20"></div>
+</div>
+</div>
+</div>
+<div class="hero-slide bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500">
+<div class="grid md:grid-cols-2 gap-0">
+<div class="p-8 md:p-12 flex flex-col justify-center text-white">
+<h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">Ofertas Especiales</h1>
+<p class="text-lg md:text-xl mb-6 text-rose-100">Aprovecha nuestras promociones y lleva los mejores productos al mejor precio.</p>
+<button onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})" class="bg-white text-rose-600 font-bold py-3 px-8 rounded-full hover:bg-rose-50 transition shadow-lg self-start">Ver Ofertas</button>
+</div>
+<div class="hidden md:block relative">
+<img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800&h=600&fit=crop" alt="Special Offers" class="w-full h-full object-cover">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent to-rose-600/20"></div>
+</div>
+</div>
+</div>
+<button class="carousel-btn prev" onclick="changeSlide(-1)">
+<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+</svg>
+</button>
+<button class="carousel-btn next" onclick="changeSlide(1)">
+<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+</svg>
+</button>
+<div class="carousel-indicators">
+<div class="indicator active" onclick="goToSlide(0)"></div>
+<div class="indicator" onclick="goToSlide(1)"></div>
+<div class="indicator" onclick="goToSlide(2)"></div>
+<div class="indicator" onclick="goToSlide(3)"></div>
+</div>
+</div>
+<div class="mb-8 mt-8">
+<h2 class="text-3xl font-bold text-center mb-2"><span class="gradient-text">Tips de Cuidado Capilar</span></h2>
+<p class="text-gray-500 text-center mb-8">Consejos profesionales para mantener tu cabello hermoso</p>
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="tip-card bg-white rounded-xl shadow-lg p-6 text-center">
+<div class="w-16 h-16 bg-gradient-to-br from-pink-400 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+<svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+</svg>
+</div>
+<h3 class="font-bold text-lg mb-2 text-gray-800">Hidratación</h3>
+<p class="text-sm text-gray-600">Usa mascarillas hidratantes al menos una vez por semana.</p>
+</div>
+<div class="tip-card bg-white rounded-xl shadow-lg p-6 text-center">
+<div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+<svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+</svg>
+</div>
+<h3 class="font-bold text-lg mb-2 text-gray-800">Protección Solar</h3>
+<p class="text-sm text-gray-600">Protege tu cabello del sol con productos con UV.</p>
+</div>
+<div class="tip-card bg-white rounded-xl shadow-lg p-6 text-center">
+<div class="w-16 h-16 bg-gradient-to-br from-fuchsia-400 to-fuchsia-600 rounded-full flex items-center justify-center mx-auto mb-4">
+<svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-8.486a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+</svg>
+</div>
+<h3 class="font-bold text-lg mb-2 text-gray-800">Corte Regular</h3>
+<p class="text-sm text-gray-600">Corta las puntas cada 6-8 semanas.</p>
+</div>
+<div class="tip-card bg-white rounded-xl shadow-lg p-6 text-center">
+<div class="w-16 h-16 bg-gradient-to-br from-pink-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+<svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+</svg>
+</div>
+<h3 class="font-bold text-lg mb-2 text-gray-800">Productos Profesionales</h3>
+<p class="text-sm text-gray-600">Usa productos de calidad profesional.</p>
+</div>
+</div>
+</div>
+<div class="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl shadow-xl p-8 text-white">
+<div class="grid md:grid-cols-2 gap-6 text-center">
+<div>
+<div class="text-3xl font-bold text-pink-400 mb-2">100%</div>
+<div class="text-gray-300">Productos Profesionales</div>
+</div>
+<div>
+<div class="text-3xl font-bold text-purple-400 mb-2">Asesoría</div>
+<div class="text-gray-300">Personalizada Gratis</div>
+</div>
+</div>
+</div>
+</div>
+<div class="mb-10">
+<h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Nuestros <span class="gradient-text">Productos</span></h2>
+<p class="text-gray-500 text-center mb-8">Eleva tu estilo al siguiente nivel con nuestros productos de calidad</p>
+</div>
+<div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+</div>
+<div id="admin-login-section" class="hidden fade-in max-w-md mx-auto mt-10 bg-white p-8 rounded-xl shadow-lg">
+<h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Acceso Administrativo</h2>
+<form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+<div class="mb-4">
+<label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+<input type="email" id="admin-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" required placeholder="admin@ejemplo.com">
+</div>
+<div class="mb-6">
+<label class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
+<input type="password" id="admin-pass" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" required placeholder="••••••••">
+</div>
+<button type="submit" id="login-btn" class="w-full bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white font-bold py-2 px-4 rounded-lg hover:from-pink-600 hover:to-fuchsia-700 transition">Ingresar</button>
+</form>
+<p id="login-error" class="text-red-500 text-sm mt-4 text-center hidden">Credenciales incorrectas</p>
+</div>
+<div id="admin-dashboard-section" class="hidden fade-in">
+<div class="flex justify-between items-center mb-8">
+<h2 class="text-2xl font-bold text-gray-800">Gestión de Productos</h2>
+<button onclick="logoutAdmin()" class="text-red-500 hover:text-red-700 font-medium">Cerrar Sesión</button>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="bg-white p-6 rounded-xl shadow-lg h-fit">
+<h3 class="text-lg font-bold mb-4 border-b pb-2 text-pink-600">Agregar Nuevo Producto</h3>
+<form id="add-product-form" onsubmit="addProduct(event)" class="space-y-4">
+<div>
+<label class="block text-sm font-medium text-gray-700">Nombre del Producto</label>
+<input type="text" id="new-prod-name" class="mt-1 w-full border rounded-md p-2" required>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700">Descripción</label>
+<textarea id="new-prod-desc" class="mt-1 w-full border rounded-md p-2" rows="3" required></textarea>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-sm font-medium text-gray-700">Precio ($)</label>
+<input type="number" id="new-prod-price" class="mt-1 w-full border rounded-md p-2" step="0.01" required>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700">¿Tiene Variantes?</label>
+<select id="new-prod-has-variants" onchange="toggleVariantsField()" class="mt-1 w-full border rounded-md p-2">
+<option value="no">No</option>
+<option value="yes">Sí</option>
+</select>
+</div>
+</div>
+<div id="variants-field" class="hidden">
+<label class="block text-sm font-medium text-gray-700">Variantes (separadas por coma)</label>
+<input type="text" id="new-prod-variants" class="mt-1 w-full border rounded-md p-2" placeholder="Ej: Negro, Rubio, Fresa, Rojo">
+<p class="text-xs text-gray-500 mt-1">Separa cada variante con una coma</p>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700">Imagen</label>
+<input type="file" id="new-prod-img" accept="image/*" class="mt-1 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100" required>
+</div>
+<button type="submit" id="add-product-btn" class="w-full bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white font-bold py-2 rounded-md hover:from-pink-600 hover:to-fuchsia-700 transition">Guardar Producto</button>
+</form>
+</div>
+<div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+<h3 class="text-lg font-bold mb-4 border-b pb-2 text-pink-600">Productos Existentes</h3>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-gray-100 text-gray-600 text-sm">
+<th class="p-3">Img</th>
+<th class="p-3">Nombre</th>
+<th class="p-3">Precio</th>
+<th class="p-3">Estado</th>
+<th class="p-3">Activo</th>
+<th class="p-3">Acción</th>
+</tr>
+</thead>
+<tbody id="admin-product-list"></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+<button id="floating-checkout-btn" onclick="openCheckoutModal()" class="floating-checkout hidden bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white font-bold py-4 px-8 rounded-full flex items-center gap-3 hover:from-pink-600 hover:to-fuchsia-700 transition-all">
+<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+</svg>
+<span>Completar Compra</span>
+<span id="floating-total" class="bg-white text-pink-600 px-3 py-1 rounded-full text-sm font-bold">$0.00</span>
+</button>
+<div id="cart-sidebar" class="fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col">
+<div class="p-4 bg-gradient-to-r from-pink-500 to-fuchsia-600 border-b flex justify-between items-center">
+<h2 class="text-xl font-bold text-white">Tu Carrito</h2>
+<button onclick="toggleCart()" class="text-white hover:text-pink-200">
+<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+</svg>
+</button>
+</div>
+<div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-4">
+<p class="text-center text-gray-400 mt-10">Tu carrito está vacío</p>
+</div>
+<div class="p-4 bg-gray-50 border-t">
+<div class="flex justify-between mb-2 text-gray-600">
+<span>Subtotal:</span>
+<span id="cart-subtotal">$0.00</span>
+</div>
+<button onclick="openCheckoutModal()" class="w-full bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white font-bold py-3 rounded-lg hover:from-pink-600 hover:to-fuchsia-700 transition shadow-lg">Completar Compra</button>
+</div>
+</div>
+<div id="checkout-modal" class="fixed inset-0 modal z-50 hidden flex items-center justify-center p-4" onclick="if(event.target === this) closeCheckoutModal()">
+<div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+<div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+<h2 class="text-2xl font-bold text-gray-800">Finalizar Pedido</h2>
+<button onclick="closeCheckoutModal()" class="text-gray-400 hover:text-gray-600 transition">
+<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+</svg>
+</button>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-4">
+<h3 class="font-bold text-gray-700 border-b pb-2 text-pink-600">Datos del Cliente</h3>
+<div class="grid grid-cols-2 gap-4">
+<input type="text" id="checkout-name" placeholder="Nombre" class="border p-2 rounded w-full">
+<input type="text" id="checkout-surname" placeholder="Apellidos" class="border p-2 rounded w-full">
+</div>
+<input type="tel" id="checkout-phone" placeholder="Número Celular" class="border p-2 rounded w-full">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Entrega</label>
+<div class="bg-pink-50 border border-pink-200 text-pink-700 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
+Solo Servicio a Domicilio
+</div>
+<input type="hidden" id="checkout-delivery-type" value="home">
+</div>
+<div id="zone-section">
+<label class="block text-sm font-medium text-gray-700 mb-1">Zona de Entrega</label>
+<select id="checkout-zone" onchange="calculateTotal()" class="border p-2 rounded w-full bg-white">
+<option value="center">Centro de la Ciudad ($300)</option>
+<option value="other">Otra Zona ($400)</option>
+</select>
+</div>
+<input type="text" id="checkout-address" placeholder="Dirección exacta de entrega" class="border p-2 rounded w-full">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Método de Pago</label>
+<select id="checkout-payment" class="border p-2 rounded w-full bg-white">
+<option value="Efectivo">Efectivo</option>
+<option value="Transferencia">Transferencia</option>
+</select>
+</div>
+</div>
+<div class="bg-gray-50 p-4 rounded-lg h-fit">
+<h3 class="font-bold text-gray-700 border-b pb-2 mb-4 text-pink-600">Resumen del Pedido</h3>
+<div id="summary-products-list" class="mb-4 space-y-2 text-sm text-gray-600 max-h-40 overflow-y-auto"></div>
+<div class="space-y-2 border-t pt-4">
+<div class="flex justify-between">
+<span>Subtotal Productos:</span>
+<span id="summary-subtotal" class="font-medium">$0.00</span>
+</div>
+<div class="flex justify-between text-pink-600">
+<span>Costo Domicilio:</span>
+<span id="summary-shipping">$0.00</span>
+</div>
+<div class="flex justify-between text-xl font-bold text-gray-800 pt-2 border-t">
+<span>TOTAL A PAGAR:</span>
+<span id="summary-total">$0.00</span>
+</div>
+</div>
+<button onclick="sendToWhatsapp()" id="whatsapp-btn" class="w-full mt-6 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition">
+<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-8.68-2.031-9.67-.272-.099-.47-.149-.669-.149-.198 0-.42.001-.643.001-.223 0-.586.085-.893.421-.307.336-1.178 1.151-1.178 2.807 0 1.657 1.208 3.257 1.376 3.48.169.223 2.379 3.632 5.763 5.093 2.253.973 2.713.779 3.207.73.495-.05 1.585-.648 1.808-1.271.223-.623.223-1.159.156-1.271z"/></svg>
+Enviar Pedido por WhatsApp
+</button>
+</div>
+</div>
+</div>
+</div>
+<div id="full-image-modal" class="fixed inset-0 full-image-modal z-[60] hidden flex items-center justify-center p-4" onclick="closeFullImageModal()">
+<div class="relative">
+<img id="full-image-src" src="" alt="Producto completo" class="animate-fade-in">
+<button onclick="closeFullImageModal()" class="absolute -top-12 right-0 text-white hover:text-pink-400 transition">
+<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+</svg>
+</button>
+</div>
+</div>
+<script>
+const SUPABASE_URL = 'https://qtcyuvbhidttoxxctrlo.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_DNd3MsCMPCBRUdHdXJNeAg_c0a1htqC';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const auth = db.auth;
+let products = [];
+let cart = [];
+let isAdmin = false;
+function showLoading(message = 'Cargando...') {
+const overlay = document.getElementById('loading-overlay');
+const text = document.getElementById('loading-text');
+text.textContent = message;
+overlay.classList.add('active');
+}
+function hideLoading() {
+const overlay = document.getElementById('loading-overlay');
+overlay.classList.remove('active');
+}
+function setButtonLoading(buttonId, isLoading) {
+const btn = document.getElementById(buttonId);
+if (btn) {
+if (isLoading) {
+btn.classList.add('btn-loading');
+btn.disabled = true;
+} else {
+btn.classList.remove('btn-loading');
+btn.disabled = false;
+}
+}
+}
+async function checkAdminSession() {
+const { data: { session } } = await auth.getSession();
+if (session) {
+isAdmin = true;
+updateAdminButtonText();
+}
+}
+function updateAdminButtonText() {
+const btnText = document.getElementById('admin-btn-text');
+if (isAdmin) {
+btnText.textContent = 'Dashboard';
+document.getElementById('admin-btn').classList.remove('text-gray-400');
+document.getElementById('admin-btn').classList.add('text-pink-500');
+} else {
+btnText.textContent = 'Admin';
+document.getElementById('admin-btn').classList.add('text-gray-400');
+document.getElementById('admin-btn').classList.remove('text-pink-500');
+}
+}
+async function checkAdminAccess() {
+if (isAdmin) {
+showSection('admin-dashboard');
+renderAdminProducts();
+} else {
+showSection('admin-login');
+}
+}
+async function handleAdminLogin(e) {
+e.preventDefault();
+setButtonLoading('login-btn', true);
+showLoading('Iniciando sesión...');
+const email = document.getElementById('admin-email').value;
+const pass = document.getElementById('admin-pass').value;
+try {
+const { data, error } = await auth.signInWithPassword({
+email: email,
+password: pass
+});
+if (error) {
+throw error;
+}
+if (data.user) {
+isAdmin = true;
+updateAdminButtonText();
+document.getElementById('admin-login-form').reset();
+document.getElementById('login-error').classList.add('hidden');
+showSection('admin-dashboard');
+renderAdminProducts();
+}
+} catch (err) {
+console.error('Error de login:', err.message);
+document.getElementById('login-error').textContent = err.message || 'Credenciales incorrectas';
+document.getElementById('login-error').classList.remove('hidden');
+} finally {
+hideLoading();
+setButtonLoading('login-btn', false);
+}
+}
+async function logoutAdmin() {
+showLoading('Cerrando sesión...');
+await auth.signOut();
+isAdmin = false;
+updateAdminButtonText();
+document.getElementById('admin-login-form').reset();
+showSection('shop');
+hideLoading();
+}
+auth.onAuthStateChange((event, session) => {
+if (event === 'SIGNED_IN') {
+isAdmin = true;
+updateAdminButtonText();
+} else if (event === 'SIGNED_OUT') {
+isAdmin = false;
+updateAdminButtonText();
+}
+});
+let currentSlide = 0;
+let slideInterval;
+const slides = document.querySelectorAll('.hero-slide');
+const indicators = document.querySelectorAll('.indicator');
+const totalSlides = slides.length;
+function showSlide(index) {
+slides.forEach((slide, i) => {
+slide.classList.remove('active');
+if (i === index) slide.classList.add('active');
+});
+indicators.forEach((indicator, i) => {
+indicator.classList.remove('active');
+if (i === index) indicator.classList.add('active');
+});
+currentSlide = index;
+}
+function changeSlide(direction) {
+let newIndex = currentSlide + direction;
+if (newIndex >= totalSlides) newIndex = 0;
+else if (newIndex < 0) newIndex = totalSlides - 1;
+showSlide(newIndex);
+resetInterval();
+}
+function goToSlide(index) {
+showSlide(index);
+resetInterval();
+}
+function nextSlide() { changeSlide(1); }
+function resetInterval() {
+clearInterval(slideInterval);
+slideInterval = setInterval(nextSlide, 5000);
+}
+document.addEventListener('DOMContentLoaded', function() { resetInterval(); });
+async function fetchProducts() {
+showLoading('Cargando productos...');
+try {
+const { data, error } = await db.from('productos').select('*').order('created_at', { ascending: false });
+if (error) throw error;
+products = data || [];
+renderShop();
+if (isAdmin) {
+renderAdminProducts();
+}
+} catch (err) {
+console.error("Error cargando productos:", err.message);
+alert('Error al cargar productos: ' + err.message);
+} finally {
+hideLoading();
+}
+}
+function showSection(sectionId) {
+document.getElementById('shop-section').classList.add('hidden');
+document.getElementById('admin-login-section').classList.add('hidden');
+document.getElementById('admin-dashboard-section').classList.add('hidden');
+const section = document.getElementById(sectionId + '-section');
+if (section) section.classList.remove('hidden');
+}
+function toggleVariantsField() {
+const hasVariants = document.getElementById('new-prod-has-variants').value;
+const variantsField = document.getElementById('variants-field');
+if (hasVariants === 'yes') {
+variantsField.classList.remove('hidden');
+} else {
+variantsField.classList.add('hidden');
+}
+}
+async function addProduct(e) {
+e.preventDefault();
+setButtonLoading('add-product-btn', true);
+showLoading('Guardando producto...');
+const fileInput = document.getElementById('new-prod-img');
+const name = document.getElementById('new-prod-name').value;
+const desc = document.getElementById('new-prod-desc').value;
+const price = parseFloat(document.getElementById('new-prod-price').value);
+const hasVariants = document.getElementById('new-prod-has-variants').value;
+const variants = document.getElementById('new-prod-variants').value;
+try {
+if (fileInput.files && fileInput.files[0]) {
+const reader = new FileReader();
+reader.onload = async function(event) {
+const newProduct = {
+nombre: name,
+descripcion: desc,
+precio: price,
+imagen: event.target.result,
+variedades: hasVariants === 'yes' ? variants : '',
+activo: true
+};
+const { error } = await db.from('productos').insert([newProduct]);
+if (error) {
+throw error;
+} else {
+document.getElementById('add-product-form').reset();
+document.getElementById('variants-field').classList.add('hidden');
+await fetchProducts();
+alert('Producto agregado correctamente');
+}
+};
+reader.readAsDataURL(fileInput.files[0]);
+}
+} catch (err) {
+alert('Error al guardar: ' + err.message);
+} finally {
+hideLoading();
+setButtonLoading('add-product-btn', false);
+}
+}
+async function toggleProductStatus(id, currentStatus) {
+showLoading('Actualizando estado...');
+try {
+const { error } = await db.from('productos')
+.update({ activo: !currentStatus })
+.eq('id', id);
+if (error) throw error;
+await fetchProducts();
+} catch (err) {
+alert('Error al actualizar: ' + err.message);
+} finally {
+hideLoading();
+}
+}
+async function deleteProduct(id) {
+if (!confirm('¿Eliminar este producto?')) return;
+showLoading('Eliminando producto...');
+try {
+const { error } = await db.from('productos').delete().eq('id', id);
+if (error) throw error;
+await fetchProducts();
+} catch (err) {
+alert('Error al eliminar: ' + err.message);
+} finally {
+hideLoading();
+}
+}
+function renderAdminProducts() {
+const tbody = document.getElementById('admin-product-list');
+tbody.innerHTML = products.map(p => {
+const variantsDisplay = p.variedades && p.variedades.trim() !== ''
+? `<span class="variant-badge">${p.variedades}</span>`
+: '<span class="text-gray-400">-</span>';
+const statusBadge = p.activo !== false
+? '<span class="status-badge status-active">Activo</span>'
+: '<span class="status-badge status-sold-out">Agotado</span>';
+return `
+<tr class="border-b ${p.activo === false ? 'bg-red-50' : ''}">
+<td class="p-3"><img src="${p.imagen}" class="w-10 h-10 object-cover rounded"></td>
+<td class="p-3 font-medium">${p.nombre}</td>
+<td class="p-3">$${p.precio}</td>
+<td class="p-3">${statusBadge}</td>
+<td class="p-3">
+<label class="flex items-center cursor-pointer">
+<input type="checkbox" class="toggle-switch"
+${p.activo !== false ? 'checked' : ''}
+onchange="toggleProductStatus(${p.id}, ${p.activo !== false})">
+</label>
+</td>
+<td class="p-3">
+<button onclick="deleteProduct(${p.id})" class="text-red-500 hover:underline">Eliminar</button>
+</td>
+</tr>
+`;
+}).join('');
+}
+function toggleCart() {
+const sidebar = document.getElementById('cart-sidebar');
+sidebar.classList.toggle('translate-x-full');
+}
+function openVariantModal(productId) {
+const product = products.find(p => p.id === productId);
+if (!product) return;
+const modal = document.createElement('div');
+modal.id = 'variant-modal';
+modal.className = 'fixed inset-0 modal z-[70] flex items-center justify-center p-4';
+modal.innerHTML = `
+<div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+<div class="p-6 border-b flex justify-between items-center">
+<h3 class="text-xl font-bold text-gray-800">${product.nombre}</h3>
+<button onclick="closeVariantModal()" class="text-gray-400 hover:text-gray-600">
+<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+</svg>
+</button>
+</div>
+<div class="p-6">
+<img src="${product.imagen}" class="w-full h-48 object-cover rounded-lg mb-4">
+<p class="text-gray-600 mb-4">${product.descripcion || ''}</p>
+<p class="text-2xl font-bold text-pink-600 mb-4">$${product.precio}</p>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-2">Selecciona una variante:</label>
+<div class="variant-selector" id="variant-options">
+${product.variedades.split(',').map(v => `
+<button class="variant-btn" onclick="selectVariant(this, '${v.trim()}')">${v.trim()}</button>
+`).join('')}
+</div>
+<p id="variant-error" class="variant-required hidden">Por favor selecciona una variante</p>
+</div>
+</div>
+<div class="p-6 border-t bg-gray-50">
+<button onclick="addToCartWithVariant(${product.id})" class="w-full bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white font-bold py-3 rounded-lg hover:from-pink-600 hover:to-fuchsia-700 transition">
+Agregar al Carrito
+</button>
+</div>
+</div>
+`;
+document.body.appendChild(modal);
+document.body.style.overflow = 'hidden';
+}
+function closeVariantModal() {
+const modal = document.getElementById('variant-modal');
+if (modal) {
+modal.remove();
+document.body.style.overflow = '';
+}
+}
+let selectedVariant = null;
+function selectVariant(btn, variant) {
+document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('selected'));
+btn.classList.add('selected');
+selectedVariant = variant;
+document.getElementById('variant-error').classList.add('hidden');
+}
+function addToCartWithVariant(productId) {
+if (!selectedVariant) {
+document.getElementById('variant-error').classList.remove('hidden');
+return;
+}
+const product = products.find(p => p.id === productId);
+if (product) {
+const existingItem = cart.find(item => item.id === productId && item.variant === selectedVariant);
+if (existingItem) {
+existingItem.quantity += 1;
+} else {
+cart.push({ ...product, quantity: 1, variant: selectedVariant });
+}
+closeVariantModal();
+selectedVariant = null;
+updateCartUI();
+const count = document.getElementById('cart-count');
+count.classList.remove('scale-0');
+count.classList.add('scale-100');
+setTimeout(() => {
+count.classList.remove('scale-100');
+count.classList.add('scale-0');
+}, 200);
+}
+}
+function addToCart(productId) {
+const product = products.find(p => p.id === productId);
+if (!product) return;
+if (product.activo === false) {
+alert('Este producto está agotado temporalmente');
+return;
+}
+if (product.variedades && product.variedades.trim() !== '') {
+openVariantModal(productId);
+} else {
+const existingItem = cart.find(item => item.id === productId);
+if (existingItem) {
+existingItem.quantity += 1;
+} else {
+cart.push({ ...product, quantity: 1, variant: null });
+}
+updateCartUI();
+const count = document.getElementById('cart-count');
+count.classList.remove('scale-0');
+count.classList.add('scale-100');
+setTimeout(() => {
+count.classList.remove('scale-100');
+count.classList.add('scale-0');
+}, 200);
+}
+}
+function removeFromCart(index) {
+const item = cart[index];
+if (item.quantity > 1) {
+item.quantity -= 1;
+} else {
+cart.splice(index, 1);
+}
+updateCartUI();
+}
+function removeItemFromCart(index) {
+cart.splice(index, 1);
+updateCartUI();
+}
+function updateCartUI() {
+const cartItems = document.getElementById('cart-items');
+const cartCount = document.getElementById('cart-count');
+const cartSubtotal = document.getElementById('cart-subtotal');
+const floatingTotal = document.getElementById('floating-total');
+const floatingBtn = document.getElementById('floating-checkout-btn');
+const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+cartCount.innerText = totalItems;
+if (cart.length === 0) {
+cartItems.innerHTML = '<p class="text-center text-gray-400 mt-10">Tu carrito está vacío</p>';
+cartCount.classList.add('scale-0');
+cartCount.classList.remove('scale-100');
+floatingBtn.classList.add('hidden');
+} else {
+const total = cart.reduce((sum, item) => sum + (item.precio * item.quantity), 0);
+cartSubtotal.innerText = `$${total.toFixed(2)}`;
+floatingTotal.innerText = `$${total.toFixed(2)}`;
+floatingBtn.classList.remove('hidden');
+cartItems.innerHTML = cart.map((item, index) => `
+<div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
+<img src="${item.imagen}" class="w-14 h-14 object-cover rounded">
+<div class="flex-1 min-w-0">
+<h4 class="font-bold text-sm truncate">${item.nombre}</h4>
+${item.variant ? `<span class="variant-badge">${item.variant}</span>` : ''}
+<p class="text-pink-500 font-bold">$${item.precio}</p>
+</div>
+<div class="flex items-center gap-2">
+<button onclick="removeFromCart(${index})" class="quantity-btn">−</button>
+<span class="font-bold text-sm w-6 text-center">${item.quantity}</span>
+<button onclick="addToCart(${item.id})" class="quantity-btn">+</button>
+</div>
+<button onclick="removeItemFromCart(${index})" class="text-gray-400 hover:text-red-500 ml-1">
+<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+</svg>
+</button>
+</div>
+`).join('');
+}
+}
+function renderShop() {
+const grid = document.getElementById('products-grid');
+grid.innerHTML = products.map(product => {
+const hasVariants = product.variedades && product.variedades.trim() !== '';
+const isSoldOut = product.activo === false;
+const variantsHtml = hasVariants
+? `<div class="mt-2 text-xs text-gray-500">Disponibles: ${product.variedades}</div>`
+: '';
+const soldOutClass = isSoldOut ? 'product-card sold-out' : 'product-card';
+const buttonText = isSoldOut ? 'Agotado' : (hasVariants ? 'Seleccionar' : 'Agregar');
+return `
+<div class="${soldOutClass} bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition border-2 border-transparent hover:border-pink-300">
+<div class="product-image-container relative" onclick="${isSoldOut ? '' : `openFullImage('${product.imagen}')`}">
+<img src="${product.imagen}" class="h-64 w-full object-cover" alt="${product.nombre}">
+${!isSoldOut ? `
+<div class="image-hint">
+<div class="hint-text">👁️ Pulsa para ver</div>
+</div>
+` : ''}
+</div>
+<div class="p-5 flex-1 flex flex-col">
+<h3 class="text-lg font-bold text-gray-800">${product.nombre}</h3>
+<p class="text-gray-500 text-sm flex-1">${product.descripcion || ''}</p>
+${variantsHtml}
+<div class="mt-4 flex items-center justify-between">
+<span class="text-xl font-bold ${isSoldOut ? 'text-gray-400' : 'text-pink-600'}">$${product.precio}</span>
+<button onclick="addToCart(${product.id})" class="add-to-cart-btn bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white px-4 py-2 rounded-lg text-sm hover:from-pink-600 hover:to-fuchsia-700 transition">
+${buttonText}
+</button>
+</div>
+</div>
+</div>
+`;
+}).join('');
+}
+function closeCheckoutModal() {
+document.getElementById('checkout-modal').classList.add('hidden');
+}
+function openCheckoutModal() {
+const modal = document.getElementById('checkout-modal');
+const summaryItems = document.getElementById('summary-products-list');
+if (summaryItems && cart.length > 0) {
+summaryItems.innerHTML = cart.map(item => `
+<div class="flex justify-between text-sm mb-2 border-b border-gray-100 pb-1">
+<span>
+${item.quantity} x ${item.nombre}
+${item.variant ? `<span class="variant-badge ml-1">${item.variant}</span>` : ''}
+</span>
+<span class="font-semibold">$${(item.precio * item.quantity).toFixed(2)}</span>
+</div>
+`).join('');
+} else if (summaryItems) {
+summaryItems.innerHTML = '<p class="text-gray-400">Carrito vacío</p>';
+}
+modal.classList.remove('hidden');
+calculateTotal();
+}
+function calculateTotal() {
+const subtotal = cart.reduce((sum, item) => sum + (item.precio * item.quantity), 0);
+const zone = document.getElementById('checkout-zone').value;
+const zoneSection = document.getElementById('zone-section');
+if(zoneSection) zoneSection.classList.remove('hidden');
+let shipping = (zone === 'center') ? 300 : 400;
+const total = subtotal + shipping;
+document.getElementById('summary-subtotal').innerText = `$${subtotal.toFixed(2)}`;
+document.getElementById('summary-shipping').innerText = `$${shipping.toFixed(2)}`;
+document.getElementById('summary-total').innerText = `$${total.toFixed(2)}`;
+}
+async function sendToWhatsapp() {
+const name = document.getElementById('checkout-name').value;
+const phone = document.getElementById('checkout-phone').value;
+const address = document.getElementById('checkout-address').value;
+const zone = document.getElementById('checkout-zone').value;
+const zoneText = zone === 'center' ? 'Centro' : 'Otra Zona';
+const total = document.getElementById('summary-total').innerText;
+const payment = document.getElementById('checkout-payment').value;
+if (!name || !phone || !address) {
+alert('Por favor completa tus datos y la dirección de entrega');
+return;
+}
+setButtonLoading('whatsapp-btn', true);
+showLoading('Generando pedido...');
+await new Promise(resolve => setTimeout(resolve, 800));
+// ✅ EMOJIS CON CÓDIGOS UNICODE PARA MAYOR COMPATIBILIDAD
+let message = '\ud83d\udecd\ufe0f *NUEVO PEDIDO - 100 PRE WUAPA* \ud83d\udecd\ufe0f\n\n';
+message += '\ud83d\udc64 *Cliente:* ' + name + '\n';
+message += '\ud83d\udcf1 *Teléfono:* ' + phone + '\n';
+message += '\ud83d\udccd *Dirección:* ' + address + ' (' + zoneText + ')\n\n';
+message += '\ud83d\udce6 *PRODUCTOS:*\n';
+cart.forEach(item => {
+const itemTotal = (item.precio * item.quantity).toFixed(2);
+const variantInfo = item.variant ? ' (' + item.variant + ')' : '';
+if (item.quantity > 1) {
+message += '\u25ab\ufe0f ' + item.quantity + ' x ' + item.nombre + variantInfo + ' - $' + itemTotal + '\n';
+} else {
+message += '\u25ab\ufe0f ' + item.nombre + variantInfo + ' - $' + item.precio + '\n';
+}
+});
+message += '\n\ud83d\udcb0 *TOTAL A PAGAR:* ' + total + '\n';
+message += '\ud83d\udcb3 *Método de pago:* ' + payment;
+const encodedMessage = encodeURIComponent(message);
+// ✅ NÚMERO DE WHATSAPP ACTUALIZADO
+window.open('https://wa.me/5351164979?text=' + encodedMessage, '_blank');
+hideLoading();
+setButtonLoading('whatsapp-btn', false);
+closeCheckoutModal();
+}
+function openFullImage(imageSrc) {
+const modal = document.getElementById('full-image-modal');
+const img = document.getElementById('full-image-src');
+img.src = imageSrc;
+modal.classList.remove('hidden');
+document.body.style.overflow = 'hidden';
+}
+function closeFullImageModal() {
+const modal = document.getElementById('full-image-modal');
+modal.classList.add('hidden');
+document.body.style.overflow = '';
+}
+checkAdminSession();
+fetchProducts();
+</script>
 </body>
 </html>
